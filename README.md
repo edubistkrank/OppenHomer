@@ -86,7 +86,8 @@ EnableDebugLogs = false
 
 ## 🤝 Contributing
 
-**I'm not a programmer** - this is my first mod ever, created with tremendous effort for personal use, but above all as a **tribute to all those amazing modders** who have given us so much work and dedication without asking for anything in return. **I owe you all a good mug of Grog, Arrr!** 🍺
+**I'm not a programmer** - this is my first mod ever, created with tremendous effort for personal use, but above all as a **tribute to all those amazing modders** who have given us so much work and dedication without asking for anything in return.
+**I owe you all a fine mug of grog... when I figure out how to get one without dissolving the mug! Arrr!** 🍺
 
 Feedback, suggestions, and contributions are welcome:
 - 🐛 **Report bugs** in Issues
@@ -98,10 +99,12 @@ Feedback, suggestions, and contributions are welcome:
 - **Game**: Survival: Fountain of Youth by Ocelot Society
 - **Framework**: BepInEx team
 - **Harmony**: Patching library
-- **Author**: 3du - Noob Pirate Developer ⛵🏴‍☠️
+- **Author**: edubistkrank (3du) ☠️ Noob Pirate ~~Developer~~ Enveloper
+  
+  *For my mum, sailing the skies* ✨*
 
 ---
 
-**⭐ If you like OppenHomer, give it a star!**
+⭐ If you like OppenHomer, give it a star!
 
 **🏴‍☠️ Happy sailing and building, pirates!**
