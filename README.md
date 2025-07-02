@@ -1,3 +1,5 @@
+![OppenHomer Banner](oppenhomer_banner.jpg)
+
 # OppenHomer 🏴‍☠️🏠
 
 **Opening new home possibilities with natural barriers!**
@@ -87,13 +89,13 @@ EnableDebugLogs = false
 ## 📸 Screenshots
 
 ### One side open house with natural barriers
-![Before OppenHomer](Screenshots/SFoY-OppenHomer-01.png)
+![One side open house with natural barriers](Screenshots/SFoY-OppenHomer-01.png)
 
 ### House detected!
-![Before OppenHomer](Screenshots/SFoY-OppenHomer-02.png)
+![House detected!](Screenshots/SFoY-OppenHomer-02.png)
 
 ### Partial open roof small house
-![Before OppenHomer](Screenshots/SFoY-OppenHomer-03.png)
+![Partial open roof small house](Screenshots/SFoY-OppenHomer-03.png)
 
 ## 🤝 Contributing
 
