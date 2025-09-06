@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -11,7 +11,7 @@ using BepInEx.Logging;
 
 namespace OppenHomer
 {
-    [BepInPlugin("OppenHomer", "OppenHomer", "1.0.0")]
+    [BepInPlugin("OppenHomer", "OppenHomer", "1.1")]
     public class OppenHomerPlugin : BaseUnityPlugin
     {
         // ==================== SINGLETON Y LOGGING ====================
@@ -29,6 +29,24 @@ namespace OppenHomer
         private static bool _vanillaIsUnderRoof = false;
         private static float _currentVanillaCoverPercent = 0f;
 
+        // ==================== LOGGING WRAPPER ELEGANTE ====================
+        /// <summary>
+        /// Wrapper para logging que respeta EnableDebugLogs
+        /// </summary>
+        public static void LogInfo(string message)
+        {
+            if (!EnableDebugLogs.Value) return;
+            ModLogger.LogInfo(message);
+        }
+
+        /// <summary>
+        /// Logging que SIEMPRE aparece (para información crítica)
+        /// </summary>
+        public static void LogInfoAlways(string message)
+        {
+            ModLogger.LogInfo(message);
+        }
+
         // ==================== INICIALIZACIÓN ====================
         void Awake()
         {
@@ -39,8 +57,8 @@ namespace OppenHomer
             var harmony = new Harmony("OppenHomer");
             harmony.PatchAll();
 
-            ModLogger.LogInfo($"OppenHomer v1.0 initialized - Unity Native + Complementary Logic!");
-            ModLogger.LogInfo($"🏠 PHILOSOPHY: Opening new home possibilities with natural barriers!");
+            LogInfoAlways($"OppenHomer v1.0 initialized - Unity Native + Complementary Logic!");
+            LogInfoAlways($"🏠 PHILOSOPHY: Opening new home possibilities with natural barriers!");
         }
 
         private void SetupConfig()
@@ -82,8 +100,7 @@ namespace OppenHomer
                     // Si vanilla ya aprobó la casa, no interferir
                     if (__result >= 1)
                     {
-                        if (EnableDebugLogs.Value)
-                            ModLogger.LogInfo($"✅ Vanilla approved house (level {__result}), no action needed");
+                        LogInfo($"✅ Vanilla approved house (level {__result}), no action needed");
                         return;
                     }
 
@@ -92,14 +109,13 @@ namespace OppenHomer
 
                     if (!vanillaDetectsConstruction)
                     {
-                        if (EnableDebugLogs.Value)
-                            ModLogger.LogInfo($"🔍 No construction detected by vanilla (cover: {coverPercent:F1}%, roof: {isUnderRoof}) - mod won't act");
+                        LogInfo($"🔍 No construction detected by vanilla (cover: {coverPercent:F1}%, roof: {isUnderRoof}) - mod won't act");
                         return;
                     }
 
-                    ModLogger.LogInfo($"🔍 Vanilla detected construction but rejected it - checking if natural barriers can complete it...");
-                    ModLogger.LogInfo($"📊 Vanilla values: cover={coverPercent:F1}%, quality={coverQuality:F2}, roof={isUnderRoof}");
-                    ModLogger.LogInfo($"🎯 MOD LOGIC: Working continuously with vanilla - checking EVERY time vanilla processes");
+                    LogInfo($"🔍 Vanilla detected construction but rejected it - checking if natural barriers can complete it...");
+                    LogInfo($"📊 Vanilla values: cover={coverPercent:F1}%, quality={coverQuality:F2}, roof={isUnderRoof}");
+                    LogInfo($"🎯 MOD LOGIC: Working continuously with vanilla - checking EVERY time vanilla processes");
 
                     // Verificar si barreras naturales completan el hogar (siempre fresco, sin cache)
                     bool naturalBarriersCompleteHome = DoNaturalBarriersCompleteHome();
@@ -119,13 +135,12 @@ namespace OppenHomer
 
                         // Aplicar resultado directamente
                         __result = targetLevel;
-                        ModLogger.LogInfo($"✅ Natural barriers complete home! Vanilla quality ({coverQuality:F2}) determines level → House{__result}");
-                        ModLogger.LogInfo($"🎯 MOD ROLE: Completed enclosure with natural barriers, vanilla quality sets the level");
+                        LogInfo($"✅ Natural barriers complete home! Vanilla quality ({coverQuality:F2}) determines level → House{__result}");
+                        LogInfo($"🎯 MOD ROLE: Completed enclosure with natural barriers, vanilla quality sets the level");
                     }
                     else
                     {
-                        if (EnableDebugLogs.Value)
-                            ModLogger.LogInfo($"❌ Natural barriers don't complete the home");
+                        LogInfo($"❌ Natural barriers don't complete the home");
                     }
                 }
                 catch (Exception ex)
@@ -144,7 +159,7 @@ namespace OppenHomer
             Vector3 playerPos = GetPlayerPosition();
             if (playerPos == Vector3.zero) return false;
 
-            ModLogger.LogInfo($"🔍 Checking natural barriers at {playerPos} (Unity native detection - no cache)");
+            LogInfo($"🔍 Checking natural barriers at {playerPos} (Unity native detection - no cache)");
 
             // Verificar componentes del hogar
             bool wallsComplete = CheckWallEnclosure(playerPos);  // 26 direcciones
@@ -153,10 +168,10 @@ namespace OppenHomer
             bool isComplete = wallsComplete && roofValid;
 
             // SIEMPRE mostrar estos logs para transparencia
-            ModLogger.LogInfo($"📊 Home completion check:");
-            ModLogger.LogInfo($"   - Walls: {(wallsComplete ? "✅" : "❌")}");
-            ModLogger.LogInfo($"   - Roof: {(roofValid ? "✅" : "❌")} (required: {RequireRoof.Value})");
-            ModLogger.LogInfo($"   → Result: {(isComplete ? "COMPLETE" : "INCOMPLETE")}");
+            LogInfo($"📊 Home completion check:");
+            LogInfo($"   - Walls: {(wallsComplete ? "✅" : "❌")}");
+            LogInfo($"   - Roof: {(roofValid ? "✅" : "❌")} (required: {RequireRoof.Value})");
+            LogInfo($"   → Result: {(isComplete ? "COMPLETE" : "INCOMPLETE")}");
 
             return isComplete;
         }
@@ -183,7 +198,7 @@ namespace OppenHomer
             int naturalBarriersFound = 0; // Contar SOLO barreras naturales encontradas
             float rayDistance = RaycastDistance.Value;
 
-            ModLogger.LogInfo($"🔍 Checking for NATURAL barriers only (vanilla already counted constructions):");
+            LogInfo($"🔍 Checking for NATURAL barriers only (vanilla already counted constructions):");
 
             for (int i = 0; i < totalDirections; i++)
             {
@@ -196,11 +211,11 @@ namespace OppenHomer
                 {
                     var hit = naturalBarrier.Value;
                     naturalBarriersFound++;
-                    ModLogger.LogInfo($"    Direction {i}: ✅ NATURAL BARRIER - '{hit.collider.name}' (distance: {hit.distance:F1}m)");
+                    LogInfo($"    Direction {i}: ✅ NATURAL BARRIER - '{hit.collider.name}' (distance: {hit.distance:F1}m)");
                 }
                 else
                 {
-                    ModLogger.LogInfo($"    Direction {i}: ❌ NO NATURAL BARRIER (checked {rayDistance}m)");
+                    LogInfo($"    Direction {i}: ❌ NO NATURAL BARRIER (checked {rayDistance}m)");
                 }
             }
 
@@ -219,11 +234,11 @@ namespace OppenHomer
 
             bool isComplete = totalEnclosurePercent >= MinWallEnclosurePercent.Value;
 
-            ModLogger.LogInfo($"📊 UNIFIED LOGIC CALCULATION:");
-            ModLogger.LogInfo($"   - Vanilla constructions: {vanillaCoverPercent:F1}%");
-            ModLogger.LogInfo($"   - Natural barriers: {naturalBarrierPercent:F1}% ({naturalBarriersFound}/26 directions)");
-            ModLogger.LogInfo($"   - TOTAL enclosure: {totalEnclosurePercent:F1}% (need {MinWallEnclosurePercent.Value:F1}%)");
-            ModLogger.LogInfo($"   → Result: {(isComplete ? "COMPLETE" : "INCOMPLETE")}");
+            LogInfo($"📊 UNIFIED LOGIC CALCULATION:");
+            LogInfo($"   - Vanilla constructions: {vanillaCoverPercent:F1}%");
+            LogInfo($"   - Natural barriers: {naturalBarrierPercent:F1}% ({naturalBarriersFound}/26 directions)");
+            LogInfo($"   - TOTAL enclosure: {totalEnclosurePercent:F1}% (need {MinWallEnclosurePercent.Value:F1}%)");
+            LogInfo($"   → Result: {(isComplete ? "COMPLETE" : "INCOMPLETE")}");
 
             return isComplete;
         }
@@ -239,36 +254,32 @@ namespace OppenHomer
             // Ordenar hits por distancia (más cerca primero)
             Array.Sort(hits, (h1, h2) => h1.distance.CompareTo(h2.distance));
 
-            if (EnableDebugLogs.Value && hits.Length > 1)
-                ModLogger.LogInfo($"      🔍 Found {hits.Length} hits, checking each...");
+            if (hits.Length > 1)
+                LogInfo($"      🔍 Found {hits.Length} hits, checking each...");
 
             foreach (var hit in hits)
             {
                 // ❌ IGNORAR construcciones del jugador (vanilla ya las procesó)
                 if (HasBuildingComponent(hit.collider))
                 {
-                    if (EnableDebugLogs.Value)
-                        ModLogger.LogInfo($"        🔍 IGNORING '{hit.collider.name}' at {hit.distance:F1}m - construction (vanilla counted)");
+                    LogInfo($"        🔍 IGNORING '{hit.collider.name}' at {hit.distance:F1}m - construction (vanilla counted)");
                     continue; // Vanilla ya las contó
                 }
 
                 // ✅ BUSCAR SOLO barreras naturales (ya filtra equipamiento internamente)
                 if (IsNaturalBarrier(hit.collider.gameObject))
                 {
-                    if (EnableDebugLogs.Value)
-                        ModLogger.LogInfo($"        🔍 FOUND natural barrier '{hit.collider.name}' at {hit.distance:F1}m");
+                    LogInfo($"        🔍 FOUND natural barrier '{hit.collider.name}' at {hit.distance:F1}m");
                     return hit;
                 }
                 else
                 {
-                    if (EnableDebugLogs.Value)
-                        ModLogger.LogInfo($"        🔍 IGNORING '{hit.collider.name}' at {hit.distance:F1}m - not natural barrier");
+                    LogInfo($"        🔍 IGNORING '{hit.collider.name}' at {hit.distance:F1}m - not natural barrier");
                     continue; // Todo lo demás se ignora automáticamente
                 }
             }
 
-            if (EnableDebugLogs.Value)
-                ModLogger.LogInfo($"        ❌ No natural barriers found in {maxDistance}m");
+            LogInfo($"        ❌ No natural barriers found in {maxDistance}m");
 
             return null;
         }
@@ -286,14 +297,12 @@ namespace OppenHomer
                 // probablemente sea al aire libre
                 if (!_vanillaIsUnderRoof)
                 {
-                    if (EnableDebugLogs.Value)
-                        ModLogger.LogInfo($"    Roof: ❌ Vanilla roof=False suggests open air location - being conservative");
+                    LogInfo($"    Roof: ❌ Vanilla roof=False suggests open air location - being conservative");
                     return false;
                 }
                 else
                 {
-                    if (EnableDebugLogs.Value)
-                        ModLogger.LogInfo($"    Roof: ✅ Vanilla detected roof, allowing (RequireRoof=false)");
+                    LogInfo($"    Roof: ✅ Vanilla detected roof, allowing (RequireRoof=false)");
                     return true;
                 }
             }
@@ -302,14 +311,12 @@ namespace OppenHomer
             if (_vanillaIsUnderRoof)
             {
                 // Vanilla ya detectó techo construido - PERFECTO, no buscar más
-                if (EnableDebugLogs.Value)
-                    ModLogger.LogInfo($"    Roof: ✅ Vanilla detected constructed roof - complementary check passed");
+                LogInfo($"    Roof: ✅ Vanilla detected constructed roof - complementary check passed");
                 return true;
             }
 
             // Vanilla NO detectó techo construido - buscar SOLO techo natural
-            if (EnableDebugLogs.Value)
-                ModLogger.LogInfo($"    Roof: Vanilla found no constructed roof, checking for NATURAL roof only...");
+            LogInfo($"    Roof: Vanilla found no constructed roof, checking for NATURAL roof only...");
 
             return CheckNaturalRoofOnly(playerPos);
         }
@@ -326,36 +333,31 @@ namespace OppenHomer
             RaycastHit[] hits = Physics.RaycastAll(ray, rayDistance);
             Array.Sort(hits, (h1, h2) => h1.distance.CompareTo(h2.distance));
 
-            if (EnableDebugLogs.Value)
-                ModLogger.LogInfo($"      Natural roof check: Found {hits.Length} potential hits in {rayDistance}m");
+            LogInfo($"      Natural roof check: Found {hits.Length} potential hits in {rayDistance}m");
 
             foreach (var hit in hits)
             {
                 // LÓGICA COMPLEMENTARIA: Ignorar construcciones del jugador (vanilla ya las procesó)
                 if (HasBuildingComponent(hit.collider))
                 {
-                    if (EnableDebugLogs.Value)
-                        ModLogger.LogInfo($"        🔍 IGNORING player building '{hit.collider.name}' at {hit.distance:F1}m - vanilla should have detected this");
+                    LogInfo($"        🔍 IGNORING player building '{hit.collider.name}' at {hit.distance:F1}m - vanilla should have detected this");
                     continue; // Vanilla debería haberlo detectado
                 }
 
                 // BUSCAR SOLO barreras naturales (ya filtra equipamiento internamente)
                 if (IsNaturalBarrier(hit.collider.gameObject))
                 {
-                    if (EnableDebugLogs.Value)
-                        ModLogger.LogInfo($"    Roof: ✅ Found NATURAL roof - '{hit.collider.name}' at {hit.distance:F1}m");
+                    LogInfo($"    Roof: ✅ Found NATURAL roof - '{hit.collider.name}' at {hit.distance:F1}m");
                     return true;
                 }
                 else
                 {
-                    if (EnableDebugLogs.Value)
-                        ModLogger.LogInfo($"        🔍 REJECTING roof hit '{hit.collider.name}' at {hit.distance:F1}m - not natural barrier");
+                    LogInfo($"        🔍 REJECTING roof hit '{hit.collider.name}' at {hit.distance:F1}m - not natural barrier");
                     continue; // Todo lo demás se ignora automáticamente
                 }
             }
 
-            if (EnableDebugLogs.Value)
-                ModLogger.LogInfo($"    Roof: ❌ No natural roof found in {rayDistance}m - open sky");
+            LogInfo($"    Roof: ❌ No natural roof found in {rayDistance}m - open sky");
 
             return false;
         }
@@ -385,8 +387,7 @@ namespace OppenHomer
 
             if (isExcluded)
             {
-                if (EnableDebugLogs.Value)
-                    ModLogger.LogInfo($"      🔍 '{obj.name}' → ❌ EXCLUDED (known non-terrain)");
+                LogInfo($"      🔍 '{obj.name}' → ❌ EXCLUDED (known non-terrain)");
                 return false;
             }
 
@@ -394,8 +395,7 @@ namespace OppenHomer
             var terrainCollider = obj.GetComponent<TerrainCollider>();
             if (terrainCollider != null)
             {
-                if (EnableDebugLogs.Value)
-                    ModLogger.LogInfo($"      🔍 '{obj.name}' → ✅ VALID (Unity TerrainCollider)");
+                LogInfo($"      🔍 '{obj.name}' → ✅ VALID (Unity TerrainCollider)");
                 return true;
             }
 
@@ -407,15 +407,13 @@ namespace OppenHomer
                 {
                     if (terrain.terrainData != null)
                     {
-                        if (EnableDebugLogs.Value)
-                            ModLogger.LogInfo($"      🔍 '{obj.name}' → ✅ VALID (Unity Terrain component with TerrainData)");
+                        LogInfo($"      🔍 '{obj.name}' → ✅ VALID (Unity Terrain component with TerrainData)");
                         return true;
                     }
                 }
                 catch (Exception ex)
                 {
-                    if (EnableDebugLogs.Value)
-                        ModLogger.LogInfo($"      🔍 '{obj.name}' → ❌ Terrain component but invalid TerrainData: {ex.Message}");
+                    LogInfo($"      🔍 '{obj.name}' → ❌ Terrain component but invalid TerrainData: {ex.Message}");
                 }
             }
 
@@ -425,8 +423,7 @@ namespace OppenHomer
 
             if (!isStatic)
             {
-                if (EnableDebugLogs.Value)
-                    ModLogger.LogInfo($"      🔍 '{obj.name}' → ❌ REJECTED (has dynamic Rigidbody - not terrain)");
+                LogInfo($"      🔍 '{obj.name}' → ❌ REJECTED (has dynamic Rigidbody - not terrain)");
                 return false;
             }
 
@@ -443,35 +440,30 @@ namespace OppenHomer
                     // MeshCollider no-convex típico de terreno
                     if (!meshCollider.convex)
                     {
-                        if (EnableDebugLogs.Value)
-                            ModLogger.LogInfo($"      🔍 '{obj.name}' → ✅ VALID (large non-convex MeshCollider: {size:F1}m - likely terrain)");
+                        LogInfo($"      🔍 '{obj.name}' → ✅ VALID (large non-convex MeshCollider: {size:F1}m - likely terrain)");
                         return true;
                     }
                     else if (size > 10f) // Convex pero muy grande
                     {
-                        if (EnableDebugLogs.Value)
-                            ModLogger.LogInfo($"      🔍 '{obj.name}' → ✅ VALID (very large convex MeshCollider: {size:F1}m)");
+                        LogInfo($"      🔍 '{obj.name}' → ✅ VALID (very large convex MeshCollider: {size:F1}m)");
                         return true;
                     }
                     else
                     {
-                        if (EnableDebugLogs.Value)
-                            ModLogger.LogInfo($"      🔍 '{obj.name}' → ❌ REJECTED (small convex MeshCollider: {size:F1}m - likely prop)");
+                        LogInfo($"      🔍 '{obj.name}' → ❌ REJECTED (small convex MeshCollider: {size:F1}m - likely prop)");
                         return false;
                     }
                 }
                 else
                 {
                     // Otros tipos de collider grandes y estáticos
-                    if (EnableDebugLogs.Value)
-                        ModLogger.LogInfo($"      🔍 '{obj.name}' → ✅ VALID (large static {collider.GetType().Name}: {size:F1}m)");
+                    LogInfo($"      🔍 '{obj.name}' → ✅ VALID (large static {collider.GetType().Name}: {size:F1}m)");
                     return true;
                 }
             }
             else
             {
-                if (EnableDebugLogs.Value)
-                    ModLogger.LogInfo($"      🔍 '{obj.name}' → ❌ REJECTED (too small or bad dimensions: {size:F1}m, height: {bounds.size.y:F1}m)");
+                LogInfo($"      🔍 '{obj.name}' → ❌ REJECTED (too small or bad dimensions: {size:F1}m, height: {bounds.size.y:F1}m)");
                 return false;
             }
         }
